@@ -13,7 +13,7 @@ namespace Accounting.Api
             {
                 var group = app.MapGroup("api/accounts");
                 group.MapPost("", CreateAccount);
-                group.MapGet("", GetAllAccounts);
+                group.MapGet("", GetAllAccounts).WithName(nameof(GetAllAccounts));
                 group.MapGet("{id:int}", GetAccountById).WithName(nameof(GetAccountById));
             }
 
@@ -21,8 +21,8 @@ namespace Accounting.Api
             {
                 var group = app.MapGroup("api/transactions");
                 group.MapPost("", Transfer);
-                group.MapGet("", GetAllTransactions);
-                group.MapGet("{id:int}", GetTransactionById);
+                group.MapGet("", GetAllTransactions).WithName(nameof(GetAllTransactions));
+                group.MapGet("{id:int}", GetTransactionById).WithName(nameof(GetTransactionById));
             }
         }
 
@@ -67,7 +67,8 @@ namespace Accounting.Api
             try
             {
                 var (fromBalance, toBalance) = store.Transfer(dto.Amount, dto.FromAccountId, dto.ToAccountId);
-                return Results.Ok(new { fromBalance, toBalance });
+                //Not providing a location because that will mean either returning a three-value tuple or a dto
+                return Results.Created();
             }
             catch (ArgumentOutOfRangeException ex)
             {
