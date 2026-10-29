@@ -44,6 +44,8 @@ public class AccountStore(IServiceScopeFactory scopeFactory)
         var scope = scopeFactory.CreateScope();
         using var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var account = context.Accounts.FirstOrDefault(a => a.Id == id && a.IsActive == true);
+        var transactions = context.Transactions.Where(a => a.FromAccountId == id || a.ToAccountId == id).ToList();
+        account?.Transactions = transactions;
         return account ?? throw new AccountNotFoundException($"Account with Id:{id} does not exist");
     }
 
@@ -67,33 +69,36 @@ public class AccountStore(IServiceScopeFactory scopeFactory)
 
             var toAccount = context.Accounts.FirstOrDefault(a => a.Id == toAccountId && a.IsActive == true) ?? throw new AccountNotFoundException("Invalid receiver account details");
 
+            fromAccount.Balance -= amount;
+            toAccount.Balance += amount;
+
+            var transaction = new Transaction
+            {
+                Id = AssignTransactionId(),
+                FromAccountId = fromAccountId,
+                ToAccountId = toAccountId,
+                Reference = reference,
+                FromAccountBalance = fromAccount.Balance,
+                ToAccountBalance = toAccount.Balance,
+                Success = true
+            };
+
             try
             {
-                fromAccount.Balance -= amount;
-                toAccount.Balance += amount;
-
-                var transaction = new Transaction
-                {
-                    Id = AssignTransactionId(),
-                    FromAccountId = fromAccountId,
-                    ToAccountId = toAccountId,
-                    Reference = reference,
-                    FromAccountBalance = fromAccount.Balance,
-                    ToAccountBalance = toAccount.Balance
-                };
-
-                //fromAccount.Transactions.Add(transaction);
                 context.SaveChanges();
-
                 context.Transactions.Add(transaction);
-                //Assuming there is no error during save here
                 context.SaveChanges();
+
+                //Uncomment line when you want to simulate a DbUpdateException
+                //ExceptionSimulator();
                 return (fromAccount.Balance, toAccount.Balance);
             }
             catch (DbUpdateException)
             {
                 fromAccount.Balance += amount;
                 toAccount.Balance -= amount;
+                transaction.Success = false;
+                context.SaveChanges();
                 throw;
             }
         }
@@ -125,5 +130,7 @@ public class AccountStore(IServiceScopeFactory scopeFactory)
 
     //private static decimal CheckAmount(decimal amount) =>
     //    amount > 0 ? amount : throw new ArgumentOutOfRangeException(paramName: nameof(amount), message: "Amount cannot be negative");
+
+    private static bool ExceptionSimulator(bool yes = true) => yes ? throw new DbUpdateException() : true;
 }
 

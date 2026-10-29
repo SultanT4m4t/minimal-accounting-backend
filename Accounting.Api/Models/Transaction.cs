@@ -13,8 +13,6 @@
         public int FromAccountId { get; init; }
         public int ToAccountId { get; init; }
 
-        //Virtual Navigation Properties
-        public Account FromAccount { get; set; }
-        public Account ToAccount { get; set; }
+
     }
 }

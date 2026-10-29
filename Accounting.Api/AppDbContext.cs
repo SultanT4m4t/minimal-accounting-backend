@@ -7,5 +7,15 @@ namespace Accounting.Api
     {
         public DbSet<Account> Accounts => Set<Account>();
         public DbSet<Transaction> Transactions => Set<Transaction>();
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Account>(entity =>
+                entity.HasMany(t => t.Transactions)
+                    .WithOne()
+                    .HasForeignKey(t => t.FromAccountId)
+                    .OnDelete(DeleteBehavior.Restrict)
+            );
+        }
     }
 }

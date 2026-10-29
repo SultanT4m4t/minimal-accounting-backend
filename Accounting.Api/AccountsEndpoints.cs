@@ -1,6 +1,7 @@
 ﻿using Accounting.Api.Models;
 using Accounting.Api.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Accounting.Api
 {
@@ -52,6 +53,7 @@ namespace Accounting.Api
             try
             {
                 var account = store.GetAccountById(id);
+                var accountDto = new AccountDto(account.Id, account.Name, account.Balance, account.Transactions);
                 return Results.Ok(account);
             }
             catch (AccountNotFoundException ex)
@@ -82,6 +84,10 @@ namespace Accounting.Api
             catch (InsufficientBalanceException ex)
             {
                 return Results.BadRequest(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return Results.InternalServerError("An error occured during processing");
             }
         }
 

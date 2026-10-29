@@ -7,7 +7,6 @@
         public decimal Balance { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public bool IsActive { get; set; } = true;
-
-        public List<Transaction> Transactions = [];
+        public List<Transaction> Transactions { get; set; } = [];
     }
 }
