@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Net.Sockets;
 using System.Text.Json;
 
-const string menu = "\t1. Get all accounts.\n\t2. Get Account by Id\n\t3. Create Account";
+const string menu = "\t1. Get all accounts.\n\t2. Get Account by Id\n\t3. Create Account\n\t4. Initiate Transfer\n\t5. Exit (Or press Q)";
 AdminConsole console = new();
 
 Console.WriteLine("Welcome to Accountant Admin Console");
@@ -41,7 +41,7 @@ try
         }
         else if (input == "3")
         {
-            Console.Write("Enter name and initial balance separated by a space: ");
+            Console.Write("Enter a name for the account: ");
             var name = Console.ReadLine();
             Console.Write("Enter initial balance: ");
             var isDecimal = decimal.TryParse(Console.ReadLine(), out decimal initialBalance);
@@ -52,12 +52,43 @@ try
                 ? $"{account}"
                 : $"Initial balance can only be a positive whole number or decimal. Default balance will be set to 0.\n {account}");
         }
+
+        else if (input == "4")
+        {
+            Console.Write("Enter source account number: ");
+            var isInt = int.TryParse(Console.ReadLine(), out int fromId);
+
+            Console.Write("Enter destination account number: ");
+            var isInt1 = int.TryParse(Console.ReadLine(), out int toId);
+
+            if (!isInt || !isInt1)
+            {
+                Console.WriteLine("Account Ids can only be integers\nPress any key to return to menu");
+                continue;
+            }
+            Console.Write("Enter amount to transfer: ");
+            var isDecimal = decimal.TryParse(Console.ReadLine(), out decimal amount);
+
+            if (!isDecimal)
+            {
+                Console.WriteLine("Please enter a valid amount");
+            }
+            var account = await console.InitiateTransfer(amount, fromId, toId);
+            Console.WriteLine(account);
+
+        }
+
+        else if ("q".Equals(input, StringComparison.InvariantCultureIgnoreCase) || input == "5")
+        {
+            break;
+        }
+
         else
         {
             Console.WriteLine("Invalid option...");
         }
 
-        Console.WriteLine("Press Esc to quit or any key to return to menu\n");
+        Console.WriteLine("Press Esc to quit or any key to return to menu)\n");
 
     } while (Console.ReadKey(true).Key != ConsoleKey.Escape);
 
@@ -74,6 +105,7 @@ catch (HttpRequestException ex) when (ex.InnerException is SocketException)
 catch (HttpRequestException ex)
 {
     Console.WriteLine($"An error occured while processing request. See below for details\n{ex.Message}");
+    Console.Read();
 }
 catch (JsonException ex)
 {
