@@ -62,8 +62,8 @@ namespace Accounting.Api
             try
             {
                 var (fromBalance, toBalance) = store.Transfer(dto.Amount, dto.FromAccountId, dto.ToAccountId);
-                //Not providing a location because that will mean either returning a three-value tuple or a dto
-                return Results.Created(nameof(GetTransactionById), new { FromAccountBalance = fromBalance, ToAccountBalance = toBalance });
+                //Not providing a transaction Id because that will mean either returning a three-value tuple or a dto
+                return Results.Ok(new { FromAccountBalance = fromBalance, ToAccountBalance = toBalance });
             }
             catch (ArgumentOutOfRangeException ex)
             {
