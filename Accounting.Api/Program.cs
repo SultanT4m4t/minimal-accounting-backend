@@ -23,6 +23,8 @@ if (app.Environment.IsDevelopment())
 
 app.MapAccountEndpoints();
 
+app.MapTransactionEndpoints();
+
 app.UseHttpsRedirection();
 
 app.Run();
