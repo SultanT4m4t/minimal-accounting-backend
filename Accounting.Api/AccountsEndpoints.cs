@@ -16,8 +16,13 @@ namespace Accounting.Api
                 group.MapGet("", GetAllAccounts).WithName(nameof(GetAllAccounts));
                 group.MapGet("{id:int}", GetAccountById).WithName(nameof(GetAccountById));
                 group.MapPost("/transfer", Transfer);
-                group.MapGet("/transactions", GetAllTransactions).WithName(nameof(GetAllTransactions));
-                group.MapGet("/transactions/{id:int}", GetTransactionById).WithName(nameof(GetTransactionById));
+            }
+
+            public void MapTransactionEndpoints()
+            {
+                var group = app.MapGroup("api/transactions");
+                group.MapGet("", GetAllTransactions).WithName(nameof(GetAllTransactions));
+                group.MapGet("/{id:int}", GetTransactionById).WithName(nameof(GetTransactionById));
             }
         }
 
